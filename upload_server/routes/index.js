@@ -1,21 +1,17 @@
 const router = require('koa-router')()
-const fs = require("fs")
+const fs = require("fs-extra");
 
 router.post('/upload/:fileName', async (ctx, next) => {
   const chunkFileName = ctx.params.fileName;
   const fileName = ctx.request.query;
   let params = [];
+  // 确保块文件夹存在
+  await fs.ensureDir(`./uploads/${chunkFileName}`);
+
   ctx.req.on('data', async (chunk) => {
       const buffer = Buffer.from(chunk)
-      console.log(buffer)
-      // await fs.mkdir(`./uploads`, { recursive: true });
-      await fs.writeFileSync(`./uploads/${fileName.chunkFileName}`,buffer);
+      await fs.writeFileSync(`./uploads/${chunkFileName}/${fileName.chunkFileName}`,buffer);
   })
-  // ctx.req.on('end', (chunk) => {
-  //   // console.log(params)
-  //     // let buffer = Buffer.concat(params);
-  //     // fs.writeFileSync(`./public/uploads/111.png`,buffer);
-  // })
   ctx.body = {
     code:101,
     data:{
