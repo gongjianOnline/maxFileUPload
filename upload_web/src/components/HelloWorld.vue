@@ -52,7 +52,7 @@ const handleUPload = async (file)=>{
   const requestList = chunks.map((item)=>createFileUploadRequest(fileHashName,item.chunkFileName,item.chunk))
   try {
     await Promise.all(requestList);
-    await axios.get("/api/xxx")
+    await axios.get(`/api/marge/${fileHashName}`)
     console.log("上传成功")
   } catch (error) {
     console.log("上传失败",error)
