@@ -20,7 +20,10 @@
       </template>
     </el-upload>
   </div>
-  <img :src="imgUrl" alt="">
+  <!-- <img :src="imgUrl" alt=""> -->
+  <div> 
+    <video :src="imgUrl" controls></video>
+  </div>
 
   <el-button class="ml-3" type="success" @click="submitUpload">
       upload to server
@@ -77,7 +80,7 @@ const createHash = async (file)=>{
 /**文件切片 */
 const fileChunk = (file,fileHashName)=>{
   let chunks:any[] = [];
-  let chunkSize = 1024 * 10;
+  let chunkSize = 1024 * 1024 * 1;
   let count = Math.ceil(file.size / chunkSize);
   for(let i=0;i<count;i++){
     let chunk = file.slice(i * chunkSize , (i + 1) * chunkSize)
