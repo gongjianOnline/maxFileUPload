@@ -94,5 +94,24 @@ router.get("/marge/:fileName",async (ctx,next)=>{
 
 })
 
+/*文件秒传 */
+router.get("/quickUpload/:fileName",async (ctx,next)=>{
+  const fileName = ctx.params.fileName;
+  console.log(fileName)
+  const result = await fs.pathExists(`./uploads/${fileName}.mp4`);
+  if(result){
+    ctx.body = {
+      code:101,
+      message:"请求成功"
+    }
+  }else{
+    ctx.body = {
+      code:102,
+      message:"请求成功"
+    }
+  }
+  
+})
+
 
 module.exports = router

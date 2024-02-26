@@ -38,7 +38,7 @@
 <script lang="ts" setup>
 import { UploadFilled } from '@element-plus/icons-vue'
 import {ref,reactive} from "vue"
-import type { UploadInstance } from 'element-plus'
+import { ElMessage, type UploadInstance } from 'element-plus'
 import axios from "axios"
 
 /**上传表单实例 */
@@ -60,7 +60,15 @@ let fileHashName = "";
 const handleSubmit = async ()=>{
    /**生成hash */
   fileHashName = await createHash(fileInfo.value.raw)
-  console.log(fileHashName)
+  const result:any = await verifyFileUpload(fileHashName)
+  console.log("测试文件秒传",result)
+  if(result.data.code===101){
+    ElMessage({
+      message: '文件传输完成.',
+      type: 'success',
+    })
+    return
+  }
   const chunks = fileChunk(fileInfo.value.raw,fileHashName)
   console.log(chunks)
   const requestList = chunks.map((item)=>createFileUploadRequest(fileHashName,item.chunkFileName,item.chunk))
@@ -145,6 +153,11 @@ const calculateAverage = ()=>{
   return sum / values.length;
 }
 
+
+/**文件秒传验证 */
+const verifyFileUpload = async (fileName)=>{
+  return await axios.get(`/api/quickUpload/${fileName}`);
+}
 
 
 </script>
