@@ -24,8 +24,13 @@
   <div> 
     <video :src="imgUrl" controls></video>
   </div>
+  <!-- 进度 -->
+  <div>总进度: {{progressAllNum}}</div>
+  <div v-for="(value, key) in progressList" :key="key">
+    {{ key }}: {{ value }}
+  </div>
 
-  <el-button class="ml-3" type="success" @click="submitUpload">
+  <el-button class="ml-3" type="success">
       upload to server
   </el-button>
 </template>
@@ -37,9 +42,9 @@ import type { UploadInstance } from 'element-plus'
 import axios from "axios"
 
 const uploadRef = ref<UploadInstance>();
-const submitUpload = ()=>{
-  
-}
+const progressList = reactive({})
+const progressAllNum = ref(0)
+
 const imgUrl = ref("")
 let fileHashName = "";
 const handleUPload = async (file)=>{
@@ -102,8 +107,26 @@ const createFileUploadRequest = (fileName,chunkFileName,chunk)=>{
     },
     params:{
       chunkFileName
+    },
+    onUploadProgress:(progressEvent:any)=>{
+      const percentCompleted = Math.round(progressEvent.loaded * 100 / progressEvent.total);
+      progressList[chunkFileName] = percentCompleted;
+      var progressAll = calculateAverage();
+      progressAllNum.value = progressAll;
     }
   })
+}
+const calculateAverage = ()=>{
+  // 获取对象的值数组
+  const values = Object.values(progressList);
+  // 如果对象为空，则返回 0
+  if (values.length === 0) {
+    return 0;
+  }
+  // 使用reduce方法计算总和
+  const sum:any = values.reduce((acc:any, curr:any) => acc + curr, 0);
+  // 返回平均值
+  return sum / values.length;
 }
 
 
