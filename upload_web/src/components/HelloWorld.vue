@@ -30,7 +30,7 @@
     {{ key }}: {{ value }}
   </div>
 
-  <el-button class="ml-3" type="success">
+  <el-button class="ml-3" type="success" @click="handleSubmit">
       upload to server
   </el-button>
 </template>
@@ -41,20 +41,27 @@ import {ref,reactive} from "vue"
 import type { UploadInstance } from 'element-plus'
 import axios from "axios"
 
+/**上传表单实例 */
 const uploadRef = ref<UploadInstance>();
+
+/**上传文件实例 */
+const fileInfo = ref<any>();
+
+/**进度条 */
 const progressList = reactive({})
 const progressAllNum = ref(0)
 
+/**预览本地路径 */
 const imgUrl = ref("")
+/*文件 hash 名称 */
 let fileHashName = "";
-const handleUPload = async (file)=>{
-  console.log(file)
-  /**预览 */
-  imgUrl.value = URL.createObjectURL(file.raw)
-  /**生成hash */
-  fileHashName = await createHash(file.raw)
+
+/*手动提交*/
+const handleSubmit = async ()=>{
+   /**生成hash */
+  fileHashName = await createHash(fileInfo.value.raw)
   console.log(fileHashName)
-  const chunks = fileChunk(file.raw,fileHashName)
+  const chunks = fileChunk(fileInfo.value.raw,fileHashName)
   console.log(chunks)
   const requestList = chunks.map((item)=>createFileUploadRequest(fileHashName,item.chunkFileName,item.chunk))
   try {
@@ -64,6 +71,15 @@ const handleUPload = async (file)=>{
   } catch (error) {
     console.log("上传失败",error)
   }
+}
+
+
+
+const handleUPload = async (file)=>{
+  console.log(file)
+  fileInfo.value = file;
+  /**预览 */
+  imgUrl.value = URL.createObjectURL(file.raw)
 }
 
 
