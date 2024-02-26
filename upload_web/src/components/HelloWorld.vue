@@ -20,7 +20,7 @@
       </template>
     </el-upload>
   </div>
-  <!-- <img :src="imgUrl" alt=""> -->
+  <img :src="imgUrl" alt="">
   <div> 
     <video :src="imgUrl" controls></video>
   </div>
@@ -49,7 +49,6 @@ const handleUPload = async (file)=>{
   /**生成hash */
   fileHashName = await createHash(file.raw)
   console.log(fileHashName)
-  fileChunk(file.raw,fileHashName)
   const chunks = fileChunk(file.raw,fileHashName)
   console.log(chunks)
   const requestList = chunks.map((item)=>createFileUploadRequest(fileHashName,item.chunkFileName,item.chunk))
