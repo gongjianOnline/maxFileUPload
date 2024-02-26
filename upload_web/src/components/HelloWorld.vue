@@ -31,7 +31,10 @@
   </div>
 
   <el-button class="ml-3" type="success" @click="handleSubmit">
-      upload to server
+    上传
+  </el-button>
+  <el-button class="ml-3" type="success" @click="handleClose">
+    取消上传
   </el-button>
 </template>
 
@@ -46,6 +49,9 @@ const uploadRef = ref<UploadInstance>();
 
 /**上传文件实例 */
 const fileInfo = ref<any>();
+
+/**axios token */
+const axiosTokenList = reactive<any[]>([]);
 
 /**进度条 */
 const progressList = reactive({})
@@ -71,7 +77,11 @@ const handleSubmit = async ()=>{
   }
   const chunks = fileChunk(fileInfo.value.raw,fileHashName)
   console.log(chunks)
-  const requestList = chunks.map((item)=>createFileUploadRequest(fileHashName,item.chunkFileName,item.chunk))
+  const requestList = chunks.map((item)=>{
+    const createToken = axios.CancelToken.source();
+    axiosTokenList.push(createToken)
+    return createFileUploadRequest(fileHashName,item.chunkFileName,item.chunk,createToken)
+  })
   try {
     await Promise.all(requestList);
     await axios.get(`/api/marge/${fileHashName}`)
@@ -121,7 +131,7 @@ const fileChunk = (file,fileHashName)=>{
 }
 
 /**创建文件上传请求 */
-const createFileUploadRequest = (fileName,chunkFileName,chunk)=>{
+const createFileUploadRequest = (fileName,chunkFileName,chunk,createToken)=>{
   return axios({
     url:`/api/upload/${fileName}`,
     method:"post",
@@ -137,7 +147,8 @@ const createFileUploadRequest = (fileName,chunkFileName,chunk)=>{
       progressList[chunkFileName] = percentCompleted;
       var progressAll = calculateAverage();
       progressAllNum.value = progressAll;
-    }
+    },
+    cancelToken:createToken.token
   })
 }
 const calculateAverage = ()=>{
@@ -157,6 +168,13 @@ const calculateAverage = ()=>{
 /**文件秒传验证 */
 const verifyFileUpload = async (fileName)=>{
   return await axios.get(`/api/quickUpload/${fileName}`);
+}
+
+/**取消上传 */
+const handleClose = ()=>{
+  axiosTokenList.forEach((item,index)=>{
+    item.cancel('请求被用户取消');
+  })
 }
 
 
