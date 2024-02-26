@@ -80,7 +80,7 @@ const createHash = async (file)=>{
 /**文件切片 */
 const fileChunk = (file,fileHashName)=>{
   let chunks:any[] = [];
-  let chunkSize = 1024 * 1024 * 1;
+  let chunkSize = 1024 * 1024 * 100;
   let count = Math.ceil(file.size / chunkSize);
   for(let i=0;i<count;i++){
     let chunk = file.slice(i * chunkSize , (i + 1) * chunkSize)

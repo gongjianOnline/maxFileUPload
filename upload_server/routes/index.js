@@ -5,23 +5,52 @@ const path = require('path');
 router.post('/upload/:fileName', async (ctx, next) => {
   const chunkFileName = ctx.params.fileName;
   const fileName = ctx.request.query;
-  let params = [];
   // 确保块文件夹存在
   await fs.ensureDir(`./uploads/${chunkFileName}`);
-  ctx.req.on('data', async (chunk) => {
-      const buffer = Buffer.from(chunk)
-      await fs.writeFileSync(`./uploads/${chunkFileName}/${fileName.chunkFileName}`,buffer);
-  })
-  ctx.body = {
-    code:101,
-    data:{
-      chunkFileName,
-      fileName,
-      body:ctx.request.body
-    },
-    message:"请求成功"
+  const result = await fileInit(ctx,chunkFileName,fileName);
+  if(result.code === 101){
+    ctx.body = {
+      code:101,
+      data:{
+        chunkFileName,
+        fileName,
+        body:ctx.request.body
+      },
+      message:"请求成功"
+    }
+  }else{
+    ctx.body = {
+      code:102,
+      data:{
+        chunkFileName,
+        fileName,
+        body:ctx.request.body
+      },
+      message:"请求失败"
+    }
   }
 })
+
+/**文件处理 */
+const fileInit = (ctx,chunkFileName,fileName)=>{
+  return new Promise((resolve,reject)=>{
+    let bufferData = Buffer.alloc(0);
+    ctx.req.on('data', async (chunk) => {
+      const chunkData = Buffer.from(chunk);
+      bufferData = Buffer.concat([bufferData, chunkData]);
+    })
+    ctx.req.on('end', async () => {
+      try {
+        await fs.writeFileSync(`./uploads/${chunkFileName}/${fileName.chunkFileName}`,bufferData);
+        console.log("传输完成")
+        resolve({code:101,message:"文件上传成功"})
+      } catch (error) {
+        console.log(error)
+        resolve({code:102,message:"文件上传失败"})
+      }
+    })
+  })
+}
 
 /**合并文件接口 */
 router.get("/marge/:fileName",async (ctx,next)=>{
@@ -29,7 +58,7 @@ router.get("/marge/:fileName",async (ctx,next)=>{
   // 上传目录路径
   const uploadsDirectory = `./uploads/${chunkFileName}`;
   // 合并后的文件路径和文件名
-  const mergedFilePath = `./uploads/${chunkFileName}.png`;
+  const mergedFilePath = `./uploads/${chunkFileName}.mp4`;
   // 创建一个空的合并文件
   fs.ensureFileSync(mergedFilePath);
   // 读取上传目录中的所有文件
