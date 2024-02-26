@@ -49,6 +49,13 @@ const fileInit = (ctx,chunkFileName,fileName)=>{
         resolve({code:102,message:"文件上传失败"})
       }
     })
+    ctx.req.on("close",async ()=>{
+      console.log("请求被中断")
+      ctx.body = {
+        code:103,
+        message:"请求被中断"
+      }
+    })
   })
 }
 
